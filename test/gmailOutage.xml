@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>Apps Status Dashboard</title>
+    <link>http://www.google.com/appsstatus/rss/en</link>
+    <description>Updates on performance information for Google Apps services from the Google Apps Status Dashboard (http://www.google.com/appsstatus#hl=en). Unless otherwise noted, this status information applies to consumer services as well as services for organizations using Google Apps.</description>
+    <item>
+      <title>Gmail</title>
+      <link>http://www.google.com/appsstatus#hl=en</link>
+      <description>&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;November 25, 2014 1:11:00 PM PST&lt;/i&gt;&lt;/p&gt;&lt;p&gt;We're investigating reports of an issue with Gmail. We will provide more information shortly.&lt;/p&gt;</description>
+      <pubDate>Tue, 25 Nov 2014 21:11:00 GMT</pubDate>
+      <guid isPermaLink="false">http://www.google.com/appsstatus#hl=en</guid>
+      <dc:date>2014-11-25T21:11:00Z</dc:date>
+    </item>
+  </channel>
+</rss>
