@@ -21,11 +21,11 @@ if __name__ == "__main__":
 								alert is continuous or only triggered upon state change.
 								Required if not specified in config.  This flag overrides
 								whatever is set in the config.""")
-	parser.add_argument('-w','--whitelist', type=list, nargs='*', help="""A whitelist for which services this job should report on.
+	parser.add_argument('-w','--whitelist', nargs='*', help="""A whitelist for which services this job should report on.
 									If both this parameter and the blacklist parameter are defined,
 									this whitelist parameter takes precedence and the blacklist parameter
 									is ignored. If neither are defined, all Google services are monitored""") 
-	parser.add_argument('-b','--blacklist', type=list, nargs='*', help="""A blakclist for which services this job should not report on.
+	parser.add_argument('-b','--blacklist', nargs='*', help="""A blacklist for which services this job should not report on.
 									If both this parameter and the whitelist parameter are defined,
 									the whitelist parameter takes precedence and this parameter
 									is ignored. If neither are defined, all Google services are monitored""") 
@@ -68,6 +68,9 @@ if __name__ == "__main__":
 	else:
 		sys.exit(1)
 
+	if whitelist and blacklist:
+		blacklist = []
+
 	if 'fromaddress' in config: 
 		fromaddress = config['fromaddress']
 	elif 'from' in args:
@@ -109,12 +112,34 @@ if __name__ == "__main__":
 	# Grab a list of alerts that we'll be sending out.
 	alerts = []
 	if alert_type == 'continuous' or not os.path.exists(previous_state):
-		alerts = newFeed.entries
+		if not blacklist and not whitelist:
+			alerts = newFeed.entries
+		elif whitelist:
+			while newFeed.entries:
+				newEntry = newFeed.entries.pop()
+				if newEntry.title in whitelist:
+					alerts.append(newEntry)
+		elif blacklist:
+			while newFeed.entries:
+				newEntry = newFeed.entries.pop()
+				if newEntry.title not in blacklist:
+					alerts.append(newEntry)
 	else:
 		oldFeed = feedparser.parse(previous_state)
 		# For detecting state transition.
 		if not oldFeed.entries:
-			alerts = newFeed.entries
+			if not blacklist and not whitelist:
+				alerts = newFeed.entries
+			elif whitelist:
+				while newFeed.entries:
+					newEntry = newFeed.entries.pop()
+					if newEntry.title in whitelist:
+						alerts.append(newEntry)
+			elif blacklist:
+				while newFeed.entries:
+					newEntry = newFeed.entries.pop()
+					if newEntry.title not in blacklist:
+						alerts.append(newEntry)
 		else:
 			while newFeed.entries:
 				newEntry = newFeed.entries.pop()
@@ -128,8 +153,8 @@ if __name__ == "__main__":
 						del oldFeed.entries[idx]
 					else:
 						alerts.append(newEntry)
-		with open(previous_state,"w") as f:
-			f.write(currentStatus)
+	with open(previous_state,"w") as f:
+		f.write(currentStatus)
 
 	for alert in alerts:
 		msg = MIMEText(alert.summary, 'html', 'utf-8')
