@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>G Suite Status Dashboard</title>
+    <link>http://www.google.com/appsstatus/rss/en</link>
+    <description>Updates on performance information for G Suite services from the G Suite Status Dashboard (http://www.google.com/appsstatus#hl=en). Unless otherwise noted, this status information applies to consumer services as well as services for organizations using G Suite.</description>
+  </channel>
+</rss>
+

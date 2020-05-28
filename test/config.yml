@@ -1,9 +1,0 @@
-rssfeed : https://www.google.com/appsstatus/rss/en
-alertType: 'statechange'
-previousState: lastStatus.xml
-whitelist : []
-blacklist : []
-fromaddress : noreply@zombo.com
-addressees : 
-        - test@user.com
-smtphost : localhost
