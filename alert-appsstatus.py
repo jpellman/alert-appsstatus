@@ -3,12 +3,10 @@ import os, sys
 import yaml
 import requests
 import feedparser
+import psutil
 
 import smtplib
 from email.mime.text import MIMEText
-
-TESTING = True
-LOCKFILE="~appsstatus.lock"
 
 if __name__ == "__main__":
 	import argparse
@@ -32,6 +30,9 @@ if __name__ == "__main__":
 	parser.add_argument('-f','--from',  help="A from address to send alerts from.")
 	parser.add_argument('-a','--addresses',  type=list, nargs='*', help="A list of addresses to send alerts to.")
 	parser.add_argument('-s','--smtp',  help="The SMTP host to use.")
+	parser.add_argument('-p','--pidfile',  help="""Where to place the pidfile.  
+                                                The pidfile is used to ensure that only one copy of this script is running at a time.
+                                                This is a crude form of mutual exclusion.""")
 
 	args = parser.parse_args()
 	with open(args.config, 'r') as f:
@@ -92,11 +93,28 @@ if __name__ == "__main__":
 	else:
 		sys.exit(1)
 
-	# Enforce concurrency of one.
-	if os.path.exists(LOCKFILE):
-		sys.exit(1)
+	if 'pidfile' in config: 
+		pidfile = config['pidfile']
+	elif 'pidfile' in args:
+		pidfile = args.pidfile
 	else:
-		with open(LOCKFILE,"w") as f:
+		sys.exit(1)
+
+	# Enforce concurrency of one.
+	if os.path.exists(pidfile):
+                try:
+                    with open(pidfile,"r") as f:
+                            oldpid = int(f.read().strip())
+                    # If pidfile is stale overwrite it.
+                    if oldpid in psutil.pids():
+		        sys.exit(1)
+                    else:
+    		        with open(pidfile,"w") as f:
+			    f.write(str(os.getpid()))
+                except:
+		    sys.exit(1)
+	else:
+		with open(pidfile,"w") as f:
 			f.write(str(os.getpid()))
 
 	# Grab the current status.
@@ -166,4 +184,4 @@ if __name__ == "__main__":
 		s.sendmail(fromaddress, addressees, msg.as_string())
 		s.quit()
 
-	os.remove(LOCKFILE)
+	os.remove(pidfile)
