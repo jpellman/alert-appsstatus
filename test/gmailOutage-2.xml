@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>G Suite Status Dashboard</title>
+    <link>http://www.google.com/appsstatus/rss/en</link>
+    <description>Updates on performance information for G Suite services from the G Suite Status Dashboard (http://www.google.com/appsstatus#hl=en). Unless otherwise noted, this status information applies to consumer services as well as services for organizations using G Suite.</description>
+    <item>
+      <title>Gmail</title>
+      <link>http://www.google.com/appsstatus#hl=en</link>
+      <description>&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/blue.gif" /&gt;&amp;nbsp;April 8, 2020 8:58:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;The problem with Gmail should be resolved. We apologize for the inconvenience and thank you for your patience and continued support. Please rest assured that system reliability is a top priority at Google, and we are making continuous improvements to make our systems better.&lt;/p&gt;&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;April 8, 2020 8:37:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;Gmail service has already been restored for some users, and we expect a resolution for all users in the near future. Please note this time frame is an estimate and may change. The affected users are able to access Gmail, but may experience delays in sending or receiving messages.&lt;/p&gt;&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;April 8, 2020 8:04:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;We're investigating reports of an issue with Gmail. We will provide more information shortly.&lt;/p&gt;</description>
+      <pubDate>Wed, 08 Apr 2020 15:58:00 GMT</pubDate>
+      <guid isPermaLink="false">outageid:3#tstamp:1586361480000</guid>
+      <dc:date>2020-04-08T15:58:00Z</dc:date>
+    </item>
+    <item>
+      <title>Gmail</title>
+      <link>http://www.google.com/appsstatus#hl=en</link>
+      <description>&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;April 8, 2020 8:37:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;Gmail service has already been restored for some users, and we expect a resolution for all users in the near future. Please note this time frame is an estimate and may change. The affected users are able to access Gmail, but may experience delays in sending or receiving messages.&lt;/p&gt;&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;April 8, 2020 8:04:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;We're investigating reports of an issue with Gmail. We will provide more information shortly.&lt;/p&gt;</description>
+      <pubDate>Wed, 08 Apr 2020 15:37:00 GMT</pubDate>
+      <guid isPermaLink="false">outageid:2#tstamp:1586360220000</guid>
+      <dc:date>2020-04-08T15:37:00Z</dc:date>
+    </item>
+    <item>
+      <title>Gmail</title>
+      <link>http://www.google.com/appsstatus#hl=en</link>
+      <description>&lt;p&gt;&lt;i&gt;&lt;img align="absmiddle" height="20" width="20" src="http://www.google.com/appsstatus/img/yellow.gif" /&gt;&amp;nbsp;April 8, 2020 8:04:00 AM PDT&lt;/i&gt;&lt;/p&gt;&lt;p&gt;We're investigating reports of an issue with Gmail. We will provide more information shortly.&lt;/p&gt;</description>
+      <pubDate>Wed, 08 Apr 2020 15:04:00 GMT</pubDate>
+      <guid isPermaLink="false">outageid:1#tstamp:1586358240000</guid>
+      <dc:date>2020-04-08T15:04:00Z</dc:date>
+    </item>
+  </channel>
+</rss>
+
