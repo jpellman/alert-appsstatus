@@ -8,6 +8,90 @@ import psutil
 import smtplib
 from email.mime.text import MIMEText
 
+def statusLock(pidfile):
+	# Enforce concurrency of one.
+	if os.path.exists(pidfile):
+                try:
+                    with open(pidfile,"r") as f:
+                            oldpid = int(f.read().strip())
+                    # If pidfile is stale overwrite it.
+                    if oldpid in psutil.pids():
+		        sys.exit(1)
+                    else:
+    		        with open(pidfile,"w") as f:
+			    f.write(str(os.getpid()))
+                except:
+		    sys.exit(1)
+	else:
+		with open(pidfile,"w") as f:
+			f.write(str(os.getpid()))
+
+def statusUnlock(pidfile):
+	os.remove(pidfile)
+
+def compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist):
+	# Parse the current status
+	newFeed = feedparser.parse(currentStatus)
+
+	# Grab a list of alerts that we'll be sending out.
+	alerts = []
+	if alertType == 'continuous' or not os.path.exists(previousStatus):
+		if not alertFilter:
+			alerts = newFeed.entries
+		elif not blacklist:
+			while newFeed.entries:
+				newEntry = newFeed.entries.pop()
+				if newEntry.title in alertFilter:
+					alerts.append(newEntry)
+		elif blacklist:
+			while newFeed.entries:
+				newEntry = newFeed.entries.pop()
+				if newEntry.title not in alertFilter:
+					alerts.append(newEntry)
+	else:
+		oldFeed = feedparser.parse(previousStatus)
+		# For detecting state transition.
+		if not oldFeed.entries:
+			if not alertFilter:
+				alerts = newFeed.entries
+			elif not blacklist:
+				while newFeed.entries:
+					newEntry = newFeed.entries.pop()
+					if newEntry.title in alertFilter:
+						alerts.append(newEntry)
+			elif blacklist:
+				while newFeed.entries:
+					newEntry = newFeed.entries.pop()
+					if newEntry.title not in alertFilter:
+						alerts.append(newEntry)
+		else:
+			while newFeed.entries:
+				newEntry = newFeed.entries.pop()
+				for idx, oldEntry in enumerate(oldFeed.entries):
+					'''
+					If this entry has been seen before- do not add to the alerts list 
+					and remove from list of potential comparisons.  Otherwise,
+					add it to the list of alerts to send out.
+					'''
+					if (newEntry.published == oldEntry.published) and (newEntry.title == oldEntry.title) and (newEntry.updated == oldEntry.updated):
+						del oldFeed.entries[idx]
+					else:
+						alerts.append(newEntry)
+	with open(previousStatus,"w") as f:
+		f.write(currentStatus)
+        return alerts
+
+def sendAlerts(alerts):
+	for alert in alerts:
+		msg = MIMEText(alert.summary, 'html', 'utf-8')
+		msg['Subject'] = "G Suite Status Alert: %s" % alert.title
+		msg['From'] = fromaddress
+		msg['To'] = ", ".join(addressees)
+
+		s = smtplib.SMTP(smtphost)
+		s.sendmail(fromaddress, addressees, msg.as_string())
+		s.quit()
+
 if __name__ == "__main__":
 	import argparse
 
@@ -43,34 +127,31 @@ if __name__ == "__main__":
 	else:
 		sys.exit(1)
 
-	if 'previous_state' in config:
-		previous_state = config['previous_state']
+	if 'previousStatus' in config:
+		previousStatus = config['previousStatus']
 	else:
 		sys.exit(1)
 
-	if 'alert_type' in config and 'type' not in args:
-		alert_type = config['alert_type']
+	if 'alertType' in config and 'type' not in args:
+		alertType = config['alertType']
 	elif 'type' in args:
-		alert_type = args.type
+		alertType = args.type
 	else:
 		sys.exit(1)
 
+        blacklist = False
 	if 'whitelist' in config: 
-		whitelist = config['whitelist']
+		alertFilter = config['whitelist']
 	elif 'whitelist' in args:
-		whitelist = args.whitelist
-	else:
-		sys.exit(1)
-
-	if 'blacklist' in config: 
-		blacklist = config['blacklist']
+		alertFilter = args.whitelist
+	elif 'blacklist' in config: 
+		alertFilter = config['blacklist']
+                blacklist = True
 	elif 'blacklist' in args:
-		blacklist = args.blacklist
+		alertFilter = args.blacklist
+                blacklist = True
 	else:
-		sys.exit(1)
-
-	if whitelist and blacklist:
-		blacklist = []
+		alertFilter = []
 
 	if 'fromaddress' in config: 
 		fromaddress = config['fromaddress']
@@ -100,88 +181,18 @@ if __name__ == "__main__":
 	else:
 		sys.exit(1)
 
-	# Enforce concurrency of one.
-	if os.path.exists(pidfile):
-                try:
-                    with open(pidfile,"r") as f:
-                            oldpid = int(f.read().strip())
-                    # If pidfile is stale overwrite it.
-                    if oldpid in psutil.pids():
-		        sys.exit(1)
-                    else:
-    		        with open(pidfile,"w") as f:
-			    f.write(str(os.getpid()))
-                except:
-		    sys.exit(1)
-	else:
-		with open(pidfile,"w") as f:
-			f.write(str(os.getpid()))
-
-	# Grab the current status.
-	if TESTING:
-		with open("test/gmailOutage.xml","r") as f:
-			currentStatus = "".join(f.readlines())
-	else:
-		currentStatus = requests.get(rssfeed).text
-	
-	# Parse the current status
-	newFeed = feedparser.parse(currentStatus)
-
-	# Grab a list of alerts that we'll be sending out.
-	alerts = []
-	if alert_type == 'continuous' or not os.path.exists(previous_state):
-		if not blacklist and not whitelist:
-			alerts = newFeed.entries
-		elif whitelist:
-			while newFeed.entries:
-				newEntry = newFeed.entries.pop()
-				if newEntry.title in whitelist:
-					alerts.append(newEntry)
-		elif blacklist:
-			while newFeed.entries:
-				newEntry = newFeed.entries.pop()
-				if newEntry.title not in blacklist:
-					alerts.append(newEntry)
-	else:
-		oldFeed = feedparser.parse(previous_state)
-		# For detecting state transition.
-		if not oldFeed.entries:
-			if not blacklist and not whitelist:
-				alerts = newFeed.entries
-			elif whitelist:
-				while newFeed.entries:
-					newEntry = newFeed.entries.pop()
-					if newEntry.title in whitelist:
-						alerts.append(newEntry)
-			elif blacklist:
-				while newFeed.entries:
-					newEntry = newFeed.entries.pop()
-					if newEntry.title not in blacklist:
-						alerts.append(newEntry)
-		else:
-			while newFeed.entries:
-				newEntry = newFeed.entries.pop()
-				for idx, oldEntry in enumerate(oldFeed.entries):
-					'''
-					If this entry has been seen before- do not add to the alerts list 
-					and remove from list of potential comparisons.  Otherwise,
-					add it to the list of alerts to send out.
-					'''
-					if (newEntry.published == oldEntry.published) and (newEntry.title == oldEntry.title) and (newEntry.updated == oldEntry.updated):
-						del oldFeed.entries[idx]
-					else:
-						alerts.append(newEntry)
-	with open(previous_state,"w") as f:
-		f.write(currentStatus)
-
-	for alert in alerts:
-		msg = MIMEText(alert.summary, 'html', 'utf-8')
-		msg['Subject'] = "G Suite Status Alert: %s" % alert.title
-		msg['From'] = fromaddress
-		msg['To'] = ", ".join(addressees)
-
-		s = smtplib.SMTP(smtphost)
-		s.sendmail(fromaddress, addressees, msg.as_string())
-		s.quit()
-
-	os.remove(pidfile)
+        try:
+            # Obtain a lock
+            statusLock(pidfile)
+            # Grab the current status.
+            currentStatus = requests.get(rssfeed).text
+            # Generate alerts
+            alerts = compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist)
+            # Release a lock
+            statusUnlock(pidfile)
+            sys.exit(0)
+        except:
+            # Clean up if lock exists.
+            if os.path.isfile(pidfile):
+                statusUnlock(pidfile)
+            sys.exit(1)
