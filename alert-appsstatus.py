@@ -77,8 +77,6 @@ def compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist):
 						del oldFeed.entries[idx]
 					else:
 						alerts.append(newEntry)
-	with open(previousStatus,"w") as f:
-		f.write(currentStatus)
         return alerts
 
 def sendAlerts(alerts):
@@ -188,6 +186,9 @@ if __name__ == "__main__":
             currentStatus = requests.get(rssfeed).text
             # Generate alerts
             alerts = compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist)
+            # Save out the current status for the next invocation.
+            with open(previousStatus,"w") as f:
+                f.write(currentStatus)
             # Release a lock
             statusUnlock(pidfile)
             sys.exit(0)
