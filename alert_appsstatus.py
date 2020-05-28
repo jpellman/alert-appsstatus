@@ -4,6 +4,7 @@ import yaml
 import requests
 import feedparser
 import psutil
+import logging
 
 import smtplib
 from email.mime.text import MIMEText
@@ -115,6 +116,7 @@ if __name__ == "__main__":
     parser.add_argument('-p','--pidfile',  help="""Where to place the pidfile.  
                                                 The pidfile is used to ensure that only one copy of this script is running at a time.
                                                 This is a crude form of mutual exclusion.""")
+    parser.add_argument('-l','--logfile',  help="Path to where log should be stored.")
 
     args = parser.parse_args()
     with open(args.config, 'r') as f:
@@ -179,21 +181,42 @@ if __name__ == "__main__":
     else:
         sys.exit(1)
 
-        try:
-            # Obtain a lock
-            statusLock(pidfile)
-            # Grab the current status.
-            currentStatus = requests.get(rssfeed).text
-            # Generate alerts
-            alerts = compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist)
-            # Save out the current status for the next invocation.
-            with open(previousStatus,"w") as f:
-                f.write(currentStatus)
-            # Release a lock
+    if 'logfile' in config: 
+        logfile = config['logfile']
+    elif 'logfile' in args:
+        logfile = args.logfile
+    else:
+        sys.exit(1)
+
+    # Set up logger.
+    logging.basicConfig(filename=logfile,format="%(asctime)s: [%(levelname)s] : %(message)s", level=logging.INFO)
+    logger = logging.getLogger('appsstatus')
+
+    try:
+        # Obtain a lock
+        statusLock(pidfile)
+        logger.info("Obtained a lock with pid %d." % os.getpid())
+        # Grab the current status.
+        logger.info("Obtaining current Google Apps Status RSS Feed over HTTP(S).")
+        currentStatus = requests.get(rssfeed).text
+        # Generate alerts
+        logger.info("Generating a list of alerts to send out.")
+        alerts = compareStatus(currentStatus,previousStatus,alertType,alertFilter,blacklist)
+        # Save out the current status for the next invocation.
+        logger.info("Saving the current Google Apps Status for next invocation of this script.")
+        with open(previousStatus,"w") as f:
+            f.write(currentStatus)
+        # Release a lock
+        logger.info("Releasing the lock.")
+        statusUnlock(pidfile)
+        logger.info("Script has successfully run. Exiting now.")
+        sys.exit(0)
+    except Exception as e:
+        # Log error
+        logger.error("Error has occurred: %s" % str(e))
+        # Clean up if lock exists.
+        logger.error("Releasing lock if it exists.")
+        if os.path.isfile(pidfile):
             statusUnlock(pidfile)
-            sys.exit(0)
-        except:
-            # Clean up if lock exists.
-            if os.path.isfile(pidfile):
-                statusUnlock(pidfile)
-            sys.exit(1)
+            logger.error("Lock released.  Exiting now.")
+        sys.exit(1)

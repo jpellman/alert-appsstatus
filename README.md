@@ -14,10 +14,7 @@ The script uses a lock file (_~appsstatus.lock_) to prevent race conditions.
 
 ## To-Do
 
- * Actually use YAML files for configuration.
- * Implement a whitelist in case we only care about certain G Suite services.
  * Attempt to add compatibility with Python 2 / make this work across all Pythons.
- * Add logging
  * Add better support for text messaging other than "use @vtext.com addresses".
  * At some point I'd like to convert this into a proper PyPI package.
 
