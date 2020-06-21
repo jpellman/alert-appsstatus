@@ -1,0 +1,12 @@
+rssfeed: https://www.google.com/appsstatus/rss/en
+previousStatus: "/var/lib/alert-appsstatus/previous.xml"
+alertType: statechange
+whitelist: 
+    - Gmail
+fromaddress:
+    - sender@localhost
+addressees: 
+    - recipient@localhost
+smtphost: "localhost"
+pidfile: "/var/lib/alert-appsstatus/alert-appsstatus.pid"
+logfile: "/var/log/alert-appsstatus.log"
