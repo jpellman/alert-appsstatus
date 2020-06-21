@@ -91,7 +91,7 @@ def sendAlerts(alerts):
         s.sendmail(fromaddress, addressees, msg.as_string())
         s.quit()
 
-if __name__ == "__main__":
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="This script will alert you when Google services are down.")    
@@ -220,3 +220,6 @@ if __name__ == "__main__":
             statusUnlock(pidfile)
             logger.error("Lock released.  Exiting now.")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
